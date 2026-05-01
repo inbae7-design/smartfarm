@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>스팜 AI - 상태창</title>
+        <title>스팜 AI - 퇴근길 리포트</title>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
         <style>
             :root {
@@ -13,6 +13,7 @@
                 --text-muted: #94a3b8;
                 --accent-green: #10b981;
                 --accent-blue: #3b82f6;
+                --accent-purple: #8b5cf6;
                 --glass-bg: rgba(255, 255, 255, 0.05);
                 --glass-border: rgba(255, 255, 255, 0.1);
             }
@@ -20,7 +21,7 @@
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
             
             body {
-                background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+                background: linear-gradient(135deg, #1e1b4b, #0f172a, #172554);
                 background-size: 400% 400%;
                 animation: gradientBG 15s ease infinite;
                 color: var(--text-main);
@@ -65,7 +66,7 @@
                 font-size: 2.5rem;
                 font-weight: 700;
                 margin-bottom: 0.5rem;
-                background: linear-gradient(to right, #34d399, #3b82f6);
+                background: linear-gradient(to right, #8b5cf6, #3b82f6);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }
@@ -73,6 +74,44 @@
             .header p {
                 color: var(--text-muted);
                 font-size: 1.1rem;
+            }
+            
+            .summary-section {
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 2.5rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .summary-card {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 16px;
+                padding: 1.5rem 2rem;
+                text-align: center;
+                flex: 1;
+                min-width: 120px;
+                max-width: 200px;
+            }
+            
+            .summary-card h3 {
+                font-size: 1.1rem;
+                color: var(--text-muted);
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+            }
+            
+            .summary-value {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: var(--text-main);
+            }
+            
+            .summary-unit {
+                font-size: 1rem;
+                color: var(--text-muted);
+                margin-left: 0.2rem;
             }
             
             .grid {
@@ -95,7 +134,7 @@
                 content: '';
                 position: absolute;
                 top: 0; left: 0; width: 100%; height: 4px;
-                background: linear-gradient(to right, var(--accent-green), var(--accent-blue));
+                background: linear-gradient(to right, var(--accent-purple), var(--accent-blue));
                 opacity: 0;
                 transition: opacity 0.3s ease;
             }
@@ -159,9 +198,26 @@
     <body>
         <div class="dashboard-container">
             <div class="header">
-                <h1>🌿 스팜 AI 출근길 리포트</h1>
-                <p>기준 시간: 2026-04-30 18:00:00 ~ 2026-05-01 09:00:00</p>
+                <h1>🌙 스팜 AI 퇴근길 리포트</h1>
+                <p>오늘 (2026-04-30) 하루 동안의 요약입니다</p>
             </div>
+            
+            
+    <div class="summary-section">
+        <div class="summary-card">
+            <h3>💧 관수</h3>
+            <p class="summary-value">0<span class="summary-unit">회</span></p>
+        </div>
+        <div class="summary-card">
+            <h3>🛡️ 방제</h3>
+            <p class="summary-value">0<span class="summary-unit">건</span></p>
+        </div>
+        <div class="summary-card">
+            <h3>🌱 생육조사</h3>
+            <p class="summary-value">0<span class="summary-unit">건</span></p>
+        </div>
+    </div>
+    
             
             <div class="grid">
                 
@@ -170,14 +226,14 @@
                 <div class="metrics">
                     <div class="metric">
                         <span class="label">평균 온도</span>
-                        <span class="value temp">17.0°C</span>
+                        <span class="value temp">20.3°C</span>
                     </div>
                     <div class="metric">
                         <span class="label">평균 습도</span>
-                        <span class="value hum">99.9%</span>
+                        <span class="value hum">77.1%</span>
                     </div>
                     <div class="metric-small">
-                        최저 <span class="min">14.6°C</span> / 최고 <span class="max">23.1°C</span>
+                        최저 <span class="min">11.9°C</span> / 최고 <span class="max">32.1°C</span>
                     </div>
                 </div>
             </div>
@@ -187,14 +243,14 @@
                 <div class="metrics">
                     <div class="metric">
                         <span class="label">평균 온도</span>
-                        <span class="value temp">17.2°C</span>
+                        <span class="value temp">20.2°C</span>
                     </div>
                     <div class="metric">
                         <span class="label">평균 습도</span>
-                        <span class="value hum">97.4%</span>
+                        <span class="value hum">71.6%</span>
                     </div>
                     <div class="metric-small">
-                        최저 <span class="min">14.9°C</span> / 최고 <span class="max">23.1°C</span>
+                        최저 <span class="min">11.7°C</span> / 최고 <span class="max">31.4°C</span>
                     </div>
                 </div>
             </div>
@@ -204,14 +260,14 @@
                 <div class="metrics">
                     <div class="metric">
                         <span class="label">평균 온도</span>
-                        <span class="value temp">18.3°C</span>
+                        <span class="value temp">20.9°C</span>
                     </div>
                     <div class="metric">
                         <span class="label">평균 습도</span>
-                        <span class="value hum">83.9%</span>
+                        <span class="value hum">66.7%</span>
                     </div>
                     <div class="metric-small">
-                        최저 <span class="min">15.8°C</span> / 최고 <span class="max">24.6°C</span>
+                        최저 <span class="min">12.5°C</span> / 최고 <span class="max">31.3°C</span>
                     </div>
                 </div>
             </div>
@@ -219,12 +275,11 @@
             </div>
             
             <div class="footer">
-                스팜이가 꼼꼼하게 수집한 야간~아침 스마트팜 환경 데이터입니다.
+                오늘도 고생 많으셨습니다! 스팜이가 내일 아침까지 하우스를 안전하게 지키겠습니다. 🚜
             </div>
         </div>
         
         <script>
-            // Subtle entrance animation delay for cards
             const cards = document.querySelectorAll('.card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
