@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "7c79c11ed4029335",
+        "id": "732f0712b178e902",
         "type": "tabs",
         "children": [
           {
-            "id": "3bc7a97ed6837ec5",
+            "id": "858395e529682c0a",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -183,9 +183,17 @@
       "bases:새 베이스 생성하기": false
     }
   },
-  "active": "3bc7a97ed6837ec5",
+  "active": "858395e529682c0a",
   "lastOpenFiles": [
     "smartfarm.db-journal",
-    "memory/2026-04-30.md"
+    "open_dashboard.py",
+    "node_modules/tunnel-rat/node_modules/zustand/readme.md",
+    "node_modules/ms/license.md",
+    "node_modules/zustand/README.md",
+    "memory/2026-04-30.md",
+    "README.md",
+    "무제 1.base",
+    "무제.base",
+    "무제"
   ]
 }

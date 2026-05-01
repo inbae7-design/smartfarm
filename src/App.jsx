@@ -251,7 +251,7 @@ export default function App() {
 
 const HomeView = ({ onChangeView, onLogout, farmSettings, setFarmSettings }) => {
   const [weather, setWeather] = useState({ temp: 0.0, hum: 0, ws: 0.0, desc: "로딩...", forecast: Array.of() });
-  const [latestReport, setLatestReport] = useState({ content: "리포트를 불러오는 중...", filename: "" });
+  const [dailyReports, setDailyReports] = useState({ morning: null, evening: null });
 
   useEffect(() => {
     const fetchWeather = async () => { try { const res = await fetch(`${MY_SERVER_URL}/api/weather`); const data = await res.json(); setWeather(data); } catch(e) {} };
@@ -259,8 +259,8 @@ const HomeView = ({ onChangeView, onLogout, farmSettings, setFarmSettings }) => 
   }, Array.of());
 
   useEffect(() => {
-    const fetchReport = async () => { try { const res = await fetch(`${MY_SERVER_URL}/api/latest-report`); const data = await res.json(); setLatestReport(data); } catch(e) { setLatestReport({content: "리포트 불러오기 실패", filename: ""}) } };
-    fetchReport();
+    const fetchReports = async () => { try { const res = await fetch(`${MY_SERVER_URL}/api/daily-reports`); const data = await res.json(); setDailyReports(data); } catch(e) { setDailyReports({morning: {content: "불러오기 실패", filename: ""}, evening: {content: "불러오기 실패", filename: ""}}) } };
+    fetchReports();
   }, Array.of());
 
   const renderMarkdown = (text) => {
@@ -345,14 +345,26 @@ const HomeView = ({ onChangeView, onLogout, farmSettings, setFarmSettings }) => 
         </div>
       </div>
 
-      {/* 5. 스팜이 리포트 요약 카드 */}
-      <div className="mt-1 bg-white border border-emerald-200 p-3 rounded-2xl w-full max-w-3xl text-left shadow-sm flex flex-col shrink-0" style={{maxHeight: '300px'}}>
-        <div className="flex justify-between items-center mb-2 border-b border-emerald-100 pb-2">
-          <h3 className="text-emerald-600 font-black text-xs">📝 스팜이 리포트 요약</h3>
-          {latestReport.filename && <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">{latestReport.filename}</span>}
+      {/* 5. 스팜이 리포트 요약 (출근 & 퇴근) */}
+      <div className="mt-1 flex flex-col sm:flex-row gap-2 w-full max-w-3xl shrink-0">
+        <div className="bg-white border border-emerald-200 p-3 rounded-2xl flex-1 text-left shadow-sm flex flex-col" style={{maxHeight: '300px', minHeight: '200px'}}>
+          <div className="flex justify-between items-center mb-2 border-b border-emerald-100 pb-2">
+            <h3 className="text-emerald-600 font-black text-xs">🌅 출근 리포트</h3>
+            {dailyReports.morning?.filename && <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">{dailyReports.morning.filename}</span>}
+          </div>
+          <div className="flex-grow overflow-y-auto no-scrollbar bg-slate-50/50 p-2 rounded-xl border border-slate-100 relative">
+            {dailyReports.morning?.content ? renderMarkdown(dailyReports.morning.content) : <p className="text-[11px] text-slate-400 text-center mt-4">리포트를 불러오는 중...</p>}
+          </div>
         </div>
-        <div className="flex-grow overflow-y-auto no-scrollbar bg-slate-50/50 p-2 rounded-xl border border-slate-100 relative">
-          {renderMarkdown(latestReport.content)}
+
+        <div className="bg-white border border-blue-200 p-3 rounded-2xl flex-1 text-left shadow-sm flex flex-col" style={{maxHeight: '300px', minHeight: '200px'}}>
+          <div className="flex justify-between items-center mb-2 border-b border-blue-100 pb-2">
+            <h3 className="text-blue-600 font-black text-xs">🌙 퇴근 리포트</h3>
+            {dailyReports.evening?.filename && <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">{dailyReports.evening.filename}</span>}
+          </div>
+          <div className="flex-grow overflow-y-auto no-scrollbar bg-slate-50/50 p-2 rounded-xl border border-slate-100 relative">
+            {dailyReports.evening?.content ? renderMarkdown(dailyReports.evening.content) : <p className="text-[11px] text-slate-400 text-center mt-4">리포트를 불러오는 중...</p>}
+          </div>
         </div>
       </div>
     </div>
@@ -1037,6 +1049,7 @@ const DataAnalysisView = ({ onChangeView, onLogout, farmSettings }) => {
   const [envSummary, setEnvSummary] = useState({max:0, min:0, avg:0, dif:0});
   const [irrigationData, setIrrigationData] = useState([]);
   const [pesticideLogs, setPesticideLogs] = useState([]);
+  const [pesticideRecords, setPesticideRecords] = useState({ records: [], stats: {} });
   const [growthLogs, setGrowthLogs] = useState([]); 
   const [difData, setDifData] = useState([]); 
   const [periodStats, setPeriodStats] = useState({morning: 0, afternoon: 0, night: 0});
@@ -1066,6 +1079,7 @@ const DataAnalysisView = ({ onChangeView, onLogout, farmSettings }) => {
     fetch(`${MY_SERVER_URL}/api/env-summary`).then(r => r.json()).then(setEnvSummary).catch(()=>{});
     fetch(`${MY_SERVER_URL}/api/irrigation-stats`).then(r => r.json()).then(setIrrigationData).catch(()=>{});
     fetch(`${MY_SERVER_URL}/api/pesticide`).then(r => r.json()).then(setPesticideLogs).catch(()=>{});
+    fetch(`${MY_SERVER_URL}/api/pesticide-records`).then(r => r.json()).then(setPesticideRecords).catch(()=>{});
     fetch(`${MY_SERVER_URL}/api/dif-stats`).then(r => r.json()).then(setDifData).catch(()=>{});
     fetch(`${MY_SERVER_URL}/api/current-period-stats`).then(r => r.json()).then(setPeriodStats).catch(()=>{});
     fetch(`${MY_SERVER_URL}/api/growth`).then(r => r.json()).then(setGrowthLogs).catch(()=>{});
@@ -1246,7 +1260,7 @@ const DataAnalysisView = ({ onChangeView, onLogout, farmSettings }) => {
           { id: 'summary', name: '📊 종합 대시보드' }, 
           { id: 'env', name: '🌡️ 온습도 통계 (DIF)' }, 
           { id: 'growth', name: '🌱 오이 생육데이터' }, 
-          { id: 'log', name: '📝 방제 및 영농일지' }
+          { id: 'log', name: '📝 병충해 방제' }
         ).map(tab => (
           <button key={tab.id} onClick={() => setDataTab(tab.id)} className={`px-5 py-3 sm:py-2.5 rounded-xl text-sm sm:text-xs font-black whitespace-nowrap transition-all shadow-sm flex-1 sm:flex-none ${dataTab === tab.id ? 'bg-emerald-500 text-white shadow-emerald-500/30 border-transparent' : 'bg-white border border-slate-200 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'}`}>
             {tab.name}
@@ -1605,25 +1619,110 @@ const DataAnalysisView = ({ onChangeView, onLogout, farmSettings }) => {
         )}
 
         {dataTab === 'log' && (
-          <div className="bg-white p-5 rounded-3xl border border-emerald-100 shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-              <h3 className="text-emerald-600 font-black text-sm">🧪 공용 농약 방제 기록</h3>
-              <button onClick={() => setShowModal(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl font-black transition-all shadow-sm w-full sm:w-auto text-xs">새 기록 작성</button>
-            </div>
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
-              <table className="w-full text-left text-slate-600" style={{fontSize: '11px', minWidth: '600px'}}>
-                <thead className="bg-slate-100 text-slate-700">
-                  <tr><th className="p-3 font-black">방제일자</th><th className="p-3 font-black">대상</th><th className="p-3 font-black">농약명</th><th className="p-3 font-black">비율</th><th className="p-3 font-black">목적</th><th className="p-3 text-center font-black">작성자</th></tr>
-                </thead>
-                <tbody>
-                  {pesticideLogs.length === 0 && <tr><td colSpan="6" className="text-center p-6 text-slate-400 font-bold">기록이 없습니다.</td></tr>}
-                  {pesticideLogs.map((log, i) => (
-                    <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-bold text-slate-700">{log.date}</td><td className="p-3 font-bold">{log.target}</td><td className="p-3 text-emerald-600 font-black bg-emerald-50/50">{log.pesticide}</td><td className="p-3 font-bold">{log.ratio}</td><td className="p-3 font-bold">{log.purpose}</td><td className="p-3 text-center font-bold">{log.author}</td>
+          <div className="flex flex-col gap-4">
+            {/* 통계 카드 영역 */}
+            {pesticideRecords.stats && pesticideRecords.stats.total_count > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm text-center">
+                  <p className="text-slate-400 text-[10px] font-black mb-1">총 방제 횟수</p>
+                  <p className="text-2xl font-black text-emerald-600">{pesticideRecords.stats.total_count}<span className="text-xs text-slate-400 ml-1">회</span></p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-blue-100 shadow-sm text-center">
+                  <p className="text-slate-400 text-[10px] font-black mb-1">총 방제 비용</p>
+                  <p className="text-2xl font-black text-blue-600">{(pesticideRecords.stats.total_cost || 0).toLocaleString()}<span className="text-xs text-slate-400 ml-1">원</span></p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm">
+                  <p className="text-slate-400 text-[10px] font-black mb-2">🐛 병해충별 빈도 TOP5</p>
+                  <div className="flex flex-col gap-1">
+                    {Object.entries(pesticideRecords.stats.pest_freq || {}).slice(0, 5).map(([name, count], i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-600 truncate mr-2">{name}</span>
+                        <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">{count}회</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-violet-100 shadow-sm">
+                  <p className="text-slate-400 text-[10px] font-black mb-2">💊 농약별 사용 빈도 TOP5</p>
+                  <div className="flex flex-col gap-1">
+                    {Object.entries(pesticideRecords.stats.drug_freq || {}).slice(0, 5).map(([name, count], i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-600 truncate mr-2">{name}</span>
+                        <span className="text-[10px] font-black text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200 whitespace-nowrap">{count}회</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CSV 방제 기록 테이블 */}
+            <div className="bg-white p-5 rounded-3xl border border-emerald-100 shadow-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                <h3 className="text-emerald-600 font-black text-sm">🧪 병충해 방제 기록 ({pesticideRecords.records?.length || 0}건)</h3>
+              </div>
+              <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                <table className="w-full text-left text-slate-600" style={{fontSize: '11px', minWidth: '900px'}}>
+                  <thead className="bg-slate-100 text-slate-700">
+                    <tr>
+                      <th className="p-3 font-black">방제일자</th>
+                      <th className="p-3 font-black">구역</th>
+                      <th className="p-3 font-black">농약/자재명</th>
+                      <th className="p-3 font-black">작용기작</th>
+                      <th className="p-3 font-black">적용병해충</th>
+                      <th className="p-3 font-black text-right">사용량</th>
+                      <th className="p-3 font-black text-right">총용량</th>
+                      <th className="p-3 font-black text-right">금액(원)</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {(!pesticideRecords.records || pesticideRecords.records.length === 0) && <tr><td colSpan="8" className="text-center p-6 text-slate-400 font-bold">CSV 방제 기록이 없습니다.</td></tr>}
+                    {(pesticideRecords.records || []).map((rec, i) => (
+                      <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td className="p-3 font-bold text-slate-700 whitespace-nowrap">{rec.date}</td>
+                        <td className="p-3 font-bold">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                            rec.zone?.includes('4동') ? 'bg-violet-50 text-violet-600 border-violet-200' :
+                            rec.zone?.includes('5동') ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                            'bg-slate-50 text-slate-600 border-slate-200'
+                          }`}>{rec.zone || '-'}</span>
+                        </td>
+                        <td className="p-3 text-emerald-600 font-black bg-emerald-50/50">{rec.pesticide}</td>
+                        <td className="p-3 font-bold text-slate-500">{rec.mechanism || '-'}</td>
+                        <td className="p-3 font-bold">
+                          <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200 text-[10px] font-black">{rec.target_pest || '-'}</span>
+                        </td>
+                        <td className="p-3 font-bold text-right">{rec.amount}</td>
+                        <td className="p-3 font-bold text-right">{rec.total_volume}</td>
+                        <td className="p-3 font-bold text-right text-blue-600">{(rec.cost || 0).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 기존 수동 입력 방제 기록 */}
+            <div className="bg-white p-5 rounded-3xl border border-emerald-100 shadow-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                <h3 className="text-emerald-600 font-black text-sm">✏️ 공용 농약 방제 기록 (수동 입력)</h3>
+                <button onClick={() => setShowModal(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl font-black transition-all shadow-sm w-full sm:w-auto text-xs">새 기록 작성</button>
+              </div>
+              <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                <table className="w-full text-left text-slate-600" style={{fontSize: '11px', minWidth: '600px'}}>
+                  <thead className="bg-slate-100 text-slate-700">
+                    <tr><th className="p-3 font-black">방제일자</th><th className="p-3 font-black">대상</th><th className="p-3 font-black">농약명</th><th className="p-3 font-black">비율</th><th className="p-3 font-black">목적</th><th className="p-3 text-center font-black">작성자</th></tr>
+                  </thead>
+                  <tbody>
+                    {pesticideLogs.length === 0 && <tr><td colSpan="6" className="text-center p-6 text-slate-400 font-bold">기록이 없습니다.</td></tr>}
+                    {pesticideLogs.map((log, i) => (
+                      <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td className="p-3 font-bold text-slate-700">{log.date}</td><td className="p-3 font-bold">{log.target}</td><td className="p-3 text-emerald-600 font-black bg-emerald-50/50">{log.pesticide}</td><td className="p-3 font-bold">{log.ratio}</td><td className="p-3 font-bold">{log.purpose}</td><td className="p-3 text-center font-bold">{log.author}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

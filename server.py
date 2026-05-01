@@ -349,6 +349,62 @@ def add_pesticide(log: PesticideLog):
     conn.close()
     return {"status": "ok"}
 
+# 💡 병충해 방제 CSV 기록 불러오기 API
+@app.get("/api/pesticide-records")
+def get_pesticide_records():
+    csv_path = os.path.join(os.path.dirname(__file__), "pesticide_records.csv")
+    if not os.path.exists(csv_path):
+        return {"records": [], "stats": {}}
+    
+    records = []
+    with open(csv_path, 'r', encoding='utf-8-sig') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            cost_str = row.get("금액(원)", "0").strip()
+            try:
+                cost_val = int(cost_str) if cost_str else 0
+            except ValueError:
+                cost_val = 0
+            records.append({
+                "date": row.get("방제일자", "").strip(),
+                "zone": row.get("구역/동", "").strip(),
+                "crop": row.get("작물", "").strip(),
+                "pesticide": row.get("농약/자재명", "").strip(),
+                "mechanism": row.get("작용기작", "").strip(),
+                "target_pest": row.get("적용병해충", "").strip(),
+                "amount": row.get("사용량", "").strip(),
+                "total_volume": row.get("총용량", "").strip(),
+                "cost": cost_val
+            })
+    
+    # 통계 계산
+    total_cost = sum(r["cost"] for r in records)
+    total_count = len(records)
+    
+    # 병해충별 빈도
+    pest_freq = {}
+    for r in records:
+        pests = [p.strip() for p in r["target_pest"].replace("，", ",").split(",") if p.strip()]
+        for p in pests:
+            pest_freq[p] = pest_freq.get(p, 0) + 1
+    
+    # 농약별 빈도
+    drug_freq = {}
+    for r in records:
+        name = r["pesticide"]
+        if name:
+            drug_freq[name] = drug_freq.get(name, 0) + 1
+    
+    return {
+        "records": records,
+        "stats": {
+            "total_count": total_count,
+            "total_cost": total_cost,
+            "pest_freq": dict(sorted(pest_freq.items(), key=lambda x: x[1], reverse=True)),
+            "drug_freq": dict(sorted(drug_freq.items(), key=lambda x: x[1], reverse=True)[:10])
+        }
+    }
+
 @app.get("/api/dif-stats")
 def get_dif_stats():
     conn = sqlite3.connect("smartfarm.db")
@@ -497,27 +553,43 @@ def export_growth_excel():
     response.headers["Content-Disposition"] = "attachment; filename=cucumber_growth_data.csv"
     return response
 
-# 💡 스팜이 최신 리포트 불러오기 API
-@app.get("/api/latest-report")
-def get_latest_report():
+# 💡 스팜이 출근/퇴근 리포트 모두 불러오기 API
+@app.get("/api/daily-reports")
+def get_daily_reports():
     memory_dir = r"c:\Users\copi7_000\스마트팜을관리하는인공지능에이전트스팜\memory"
     if not os.path.exists(memory_dir):
-        # 방금 만든 현재 워크스페이스의 memory도 체크
         memory_dir = r"c:\Users\copi7_000\smartfarm-web\memory"
         if not os.path.exists(memory_dir):
-            return {"content": "스팜이의 리포트 디렉토리를 찾을 수 없습니다.", "filename": ""}
+            return {"morning": {"content": "스팜이의 리포트 디렉토리를 찾을 수 없습니다.", "filename": ""}, 
+                    "evening": {"content": "스팜이의 리포트 디렉토리를 찾을 수 없습니다.", "filename": ""}}
     
     files = [f for f in os.listdir(memory_dir) if f.endswith('.md') and f != 'README.md']
     if not files:
-        return {"content": "아직 작성된 리포트가 없습니다.", "filename": ""}
+        return {"morning": {"content": "아직 작성된 출근 리포트가 없습니다.", "filename": ""}, 
+                "evening": {"content": "아직 작성된 퇴근 리포트가 없습니다.", "filename": ""}}
     
-    files.sort(key=lambda x: os.path.getmtime(os.path.join(memory_dir, x)))
-    latest_file = files[-1]
+    # 수정 시간 역순 정렬 (최신 파일이 앞으로 오도록)
+    files.sort(key=lambda x: os.path.getmtime(os.path.join(memory_dir, x)), reverse=True)
     
-    with open(os.path.join(memory_dir, latest_file), 'r', encoding='utf-8') as f:
-        content = f.read()
-        
-    return {"content": content, "filename": latest_file}
+    morning_file = None
+    evening_file = None
+    
+    for f in files:
+        if '_morning.md' in f:
+            if not morning_file: morning_file = f
+        else:
+            if not evening_file: evening_file = f
+        if morning_file and evening_file: break
+
+    def read_file(fname):
+        if not fname: return "아직 작성된 리포트가 없습니다."
+        with open(os.path.join(memory_dir, fname), 'r', encoding='utf-8') as file:
+            return file.read()
+
+    return {
+        "morning": {"content": read_file(morning_file), "filename": morning_file or ""},
+        "evening": {"content": read_file(evening_file), "filename": evening_file or ""}
+    }
 
 
 if __name__ == "__main__":
