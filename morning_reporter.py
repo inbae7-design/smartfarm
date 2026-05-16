@@ -1,9 +1,17 @@
 import sqlite3
 import datetime
 import os
+import logging
 
-DB_PATH = r"C:\Users\copi7_000\smartfarm-web\smartfarm.db"
-MEMORY_DIR = r"c:\Users\copi7_000\스마트팜을관리하는인공지능에이전트스팜\memory"
+DB_PATH = r"C:\Users\copi7_000\smartfarm.db"
+MEMORY_DIR = r"c:\Users\copi7_000\smartfarm-web\memory"
+
+logging.basicConfig(
+    filename=os.path.join(r"c:\Users\copi7_000\smartfarm-web", "morning_reporter.log"),
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    encoding='utf-8'
+)
 
 def get_morning_data():
     now = datetime.datetime.now()
@@ -82,6 +90,7 @@ def generate_morning_report():
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(report_lines))
         
+    logging.info(f"Morning report generated successfully: {report_path}")
     print(f"Morning report generated successfully: {report_path}")
 
 if __name__ == "__main__":
